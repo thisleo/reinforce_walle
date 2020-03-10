@@ -24,60 +24,58 @@
 
 ![](https://raw.githubusercontent.com/Chendyiwhy/ImageUploader/master/20200310094634.png?token=AF4RSBBH4QYA7WLSV2T4TCS6M3Y3U)
 
-### 首先是集成Walle
+> > > ### 首先是集成Walle
+> > >
+> > > 这里只简单写下Gradle插件使用方式, 如有其他需求请查看主页[Meituan-Dianping](https://github.com/Meituan-Dianping)/**[walle](https://github.com/Meituan-Dianping/walle)**
+> > >
+> > > #### 配置build.gradle
+> > >
+> > > 在位于项目的根目录 `build.gradle` 文件中添加Walle Gradle插件的依赖， 如下：
+> > >
+> > > ```groovy
+> > > buildscript {
+> > >     dependencies {
+> > >         classpath 'com.meituan.android.walle:plugin:1.1.6'
+> > >     }
+> > > }
+> > > ```
+> > >
+> > > 并在当前App的 `build.gradle` 文件中apply这个插件，并添加上用于读取渠道号的AAR
+> > >
+> > > ```groovy
+> > > apply plugin: 'walle'
+> > > 
+> > > dependencies {
+> > >     compile 'com.meituan.android.walle:library:1.1.6'
+> > > }
+> > > ```
+> > >
+> > > #### 配置插件
+> > >
+> > > ```groovy
+> > > walle {
+> > >     // 指定渠道包的输出路径
+> > >     apkOutputFolder = new File("${project.buildDir}/outputs/channels");
+> > >     // 定制渠道包的APK的文件名称
+> > >     apkFileNameFormat = '${appName}-${packageName}-${channel}-${buildType}-v${versionName}-${versionCode}-${buildTime}.apk';
+> > >     // 渠道配置文件
+> > >     channelFile = new File("${project.getProjectDir()}/channel")
+> > > }
+> > > ```
+> > >
+> > > #### 如何获取渠道信息
+> > >
+> > > 在需要渠道等信息时可以通过下面代码进行获取
+> > >
+> > > ```java
+> > > String channel = WalleChannelReader.getChannel(this.getApplicationContext());
+> > > ```
+> > >
+> > > 
 
-这里只简单写下Gradle插件使用方式, 如有其他需求请查看主页[Meituan-Dianping](https://github.com/Meituan-Dianping)/**[walle](https://github.com/Meituan-Dianping/walle)**
-
-#### 配置build.gradle
-
-在位于项目的根目录 `build.gradle` 文件中添加Walle Gradle插件的依赖， 如下：
-
-```groovy
-buildscript {
-    dependencies {
-        classpath 'com.meituan.android.walle:plugin:1.1.6'
-    }
-}
-```
-
-并在当前App的 `build.gradle` 文件中apply这个插件，并添加上用于读取渠道号的AAR
-
-```groovy
-apply plugin: 'walle'
-
-dependencies {
-    compile 'com.meituan.android.walle:library:1.1.6'
-}
-```
-
-#### 配置插件
-
-```groovy
-walle {
-    // 指定渠道包的输出路径
-    apkOutputFolder = new File("${project.buildDir}/outputs/channels");
-    // 定制渠道包的APK的文件名称
-    apkFileNameFormat = '${appName}-${packageName}-${channel}-${buildType}-v${versionName}-${versionCode}-${buildTime}.apk';
-    // 渠道配置文件
-    channelFile = new File("${project.getProjectDir()}/channel")
-}
-```
-
-#### 如何获取渠道信息
-
-在需要渠道等信息时可以通过下面代码进行获取
-
-```java
-String channel = WalleChannelReader.getChannel(this.getApplicationContext());
-```
-
----
-
-
+***
 
 ### 实现原理
-
-
 
 ##### 1. 加固
 
