@@ -1,0 +1,239 @@
+/*加载keystore.properties信息到该gradle文件中*/
+def keystorePropertiesFile = rootProject.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+ext {
+    /*加固*/
+    REINFORCE_JAR = "${project.rootDir}/jiagu/jiagu.jar"
+    REINFORCE_NAME = keystoreProperties['360_NAME'] //360加固账号
+    REINFORCE_PASSWORD = keystoreProperties['360_PASSWORD'] //360加固密码
+    KEY_PATH = keystoreProperties['storeFile'] //密钥路径
+    KEY_PASSWORD = keystoreProperties['storePassword'] //密钥密码
+    ALIAS = keystoreProperties['keyAlias'] //密钥别名
+    ALIAS_PASSWORD = keystoreProperties['keyPassword'] //别名密码
+    SOURCE_APK_PATH = "${project.buildDir}/bakApk"  //源apk文件路径
+    DEFAULT_APK_PATH = "${project.buildDir}/outputs/apk/release" //默认release文件路径
+    /*多渠道打包*/
+    WALLE_JAR = "${project.rootDir}/walle-cli-all.jar"
+    WALLE_CHANNELS_CONFIG = "${project.rootDir}/app/channel"  //渠道配置文件
+    CHANNEL_APKS_PATH = "${project.buildDir}/outputs/channels"  //渠道Apk输出路径
+}
+
+/**
+ * 设置apk输出名称
+ * @return
+ */
+String getApkName() {
+    // Apk名称 可自定义
+    return "app-release_" + getApkVersionName()
+}
+
+/**
+ * 清空上一次生成的渠道包
+ * @param channelApkPath 渠道包目录地址
+ * @return
+ */
+def cleanFilesPath(channelApkPath) {
+    println(channelApkPath)
+    println(rootProject.buildDir.getPath())
+    delete channelApkPath
+    delete SOURCE_APK_PATH
+    delete rootProject.buildDir
+}
+
+/**
+ * 获取android sdk目录
+ * @return 返回sdk下build-tools 项目使用版本的目录
+ */
+String getAndroidSdkPath() {
+    File sdkDir = android.getSdkDirectory()
+    return sdkDir.getAbsolutePath() + "/build-tools/${rootProject.ext.buildToolsVersion}/"
+}
+
+/**
+ * 获取app版本信息
+ * @return 返回版本信息+版本号
+ */
+String getApkVersionName() {
+    def version = rootProject.ext.versionName.replace(".", "")
+    return version + "_" + rootProject.ext.versionCode
+}
+
+/**
+ * 根据操作系统 获取命令提示符
+ * windows powershell
+ * Mac OS  bash
+ * Linux   sh
+ * Mac 是用sh也是可以的
+ * @return
+ */
+static String getCommand() {
+    if (isWindows()) {
+        return "powershell"
+    } else {
+        return "sh"
+    }
+}
+
+/**
+ * 360加固
+ * @param apk 加固的原始apk File
+ * @param outputPath 输出目录
+ */
+def reinforceApk(File apk, outputPath) {
+    println "--- 360 reinforceApk start! ---"
+    println "reinforce apk:" + apk
+    if (apk == null || !apk.exists()) {
+        println "---360 reinforceApk throw exception and forced stop!---"
+        throw new FileNotFoundException('apk is not exists and cannot reinforce')
+    }
+    def file = new File(outputPath)
+    if (!file.exists()) {
+        file.mkdir()
+    }
+    exec {
+        commandLine getCommand(), "-c", "java -jar ${REINFORCE_JAR} -login  ${REINFORCE_NAME} ${REINFORCE_PASSWORD}"
+        commandLine getCommand(), "-c", "java -jar ${REINFORCE_JAR} -showsign"
+        commandLine getCommand(), "-c", "java -jar ${REINFORCE_JAR} -jiagu ${apk} ${outputPath}"
+    }
+    println "--- 360 reinforce end! ---"
+}
+
+/**
+ * 加固后的apk 对齐压缩
+ * @param apk 已加固apk
+ * @return 返回对齐压缩后的apk
+ */
+def zipAlignApk(File apk) {
+    if (apk == null || !apk.exists()) {
+        println "---zipalign reinforceApk throw exception and forced stop!---"
+        throw new FileNotFoundException('apk is not exists and cannot reinforce')
+    }
+    def BUILD_TOOL_PATH = getAndroidSdkPath()
+    def APK_NAME = getApkName() + "_jiagu_zip.apk"
+    def file = new File("${SOURCE_APK_PATH}/${APK_NAME}")
+    if (file.exists()) {
+        file.delete()
+    }
+
+    exec {
+        commandLine getCommand(), "-c", "${BUILD_TOOL_PATH}zipalign -v -p 4 ${apk} ${SOURCE_APK_PATH}/${APK_NAME}"
+    }
+}
+
+/**
+ * 对apk签名
+ * @param zipApk 压缩对齐后的apk
+ * @return 签名后的apk
+ */
+def signApkV2(File zipApk) {
+    if (zipApk == null || !zipApk.exists()) {
+        println "---sign zipApk throw exception and forced stop!---"
+        throw new FileNotFoundException('apk is not exists and cannot reinforce')
+    }
+    def BUILD_TOOL_PATH = getAndroidSdkPath()
+    def APK_NAME = "app-release_" + getApkVersionName() + "_jiagu_zip_sign.apk"
+    def file = new File("${SOURCE_APK_PATH}/${APK_NAME}")
+    if (file.exists()) {
+        file.delete()
+    }
+    exec {
+        commandLine getCommand(), "-c", "${BUILD_TOOL_PATH}apksigner sign --ks ${KEY_PATH} --ks-key-alias ${ALIAS} --ks-pass pass:${KEY_PASSWORD} --key-pass pass:${ALIAS_PASSWORD} --out ${SOURCE_APK_PATH}/${APK_NAME} ${zipApk}"
+    }
+}
+
+/**
+ * 对签名后的apk添加渠道信息
+ * @param apk 已签名apk
+ * @return 添加渠道信息后的apk
+ */
+def buildChannelApks(File apk) {
+    if (apk == null || !apk.exists()) {
+        println "---Channel build Apk throw exception and forced stop!---"
+        throw new FileNotFoundException('apk is not exists and cannot reinforce')
+    }
+    def file = new File(CHANNEL_APKS_PATH)
+    if (!file.exists()) {
+        file.mkdir()
+    }
+    def APK_NAME = getApkName() + "_jiagu_zip_sign.apk"
+
+    exec {
+        //java -jar walle-cli-all.jar batch -f /Users/Meituan/walle/app/channel  /Users/Meituan/walle/app/build/outputs/apk/app.apk
+        commandLine getCommand(), "-c", "java -jar ${WALLE_JAR} batch -f ${WALLE_CHANNELS_CONFIG} ${SOURCE_APK_PATH}/${APK_NAME} ${CHANNEL_APKS_PATH}"
+    }
+}
+
+/**
+ * 重命名apk
+ * @param path 渠道apk目录路径
+ * @return
+ */
+def renameChannelApkFiles(path) {
+//    def APK_NAME = "app-release_" + getApkVersionName() + "_jiagu_zip_sign.apk"
+    def regex = getApkName() + "_jiagu_zip_sign"
+    def dir = new File(path+"/")
+    dir.listFiles().each {file ->
+        if (file.name =~ /${regex}.*\.apk/) {
+            String newName = file.name
+            newName = newName.replaceAll(~/_jiagu/, "")
+            newName = newName.replaceAll(~/_zip/, "")
+            newName = newName.replaceAll(~/_sign/, "")
+            file.renameTo(new File(file.getParent(), newName))
+        }
+    }
+}
+
+/**
+ * 查找apk
+ * @param path
+ * @param suffix
+ * @return
+ */
+static File findApkFile(path, suffix) {
+    def dir = new File(path)
+    return dir.listFiles().find { it.isFile() && it =~ /.*${suffix}\.apk/ }
+}
+
+
+static Boolean isWindows() {
+    // mac  Mac OS X
+    // windows Windows
+    return System.properties['os.name'].contains('Windows')
+}
+
+
+
+/**
+ * 360加固 + 美团walle渠道打包
+ */
+task assembleReinforceRelease() {
+    group '360reinforce'
+    dependsOn("assembleRelease")
+
+    doLast {
+        cleanFilesPath(CHANNEL_APKS_PATH)   //清空上一次生成的渠道包
+
+        def releaseApkFile = findApkFile(DEFAULT_APK_PATH, "-release")  //遍历文件，寻找release包
+        println "--release--1-" + releaseApkFile
+        if (releaseApkFile != null) {
+            reinforceApk(releaseApkFile, SOURCE_APK_PATH)   //执行加固
+            def reinforceApk = findApkFile(SOURCE_APK_PATH, "_jiagu")  //寻找已加固的apk包
+            println "--jiagu--2-" + reinforceApk
+            if(reinforceApk != null) {
+                zipAlignApk(reinforceApk) // zip对齐
+                def zipAlignApk = findApkFile(SOURCE_APK_PATH, "_zip")
+                if (zipAlignApk != null) {
+                    signApkV2(zipAlignApk)  //使用V2重签名
+                    def signatureApk = findApkFile(SOURCE_APK_PATH, "_sign")
+                    println "--sign--3-" + signatureApk
+                    if(signatureApk != null) {
+                        buildChannelApks(signatureApk)  //执行多渠道打包
+                        renameChannelApkFiles(CHANNEL_APKS_PATH) //重命名渠道包
+                    }
+                }
+            }
+        }
+    }
+}

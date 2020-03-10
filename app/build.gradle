@@ -1,0 +1,107 @@
+apply plugin: 'com.android.application'
+apply plugin: 'walle'
+apply from: 'reinforce.gradle'
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+    defaultConfig {
+        applicationId rootProject.ext.applicationId
+        minSdkVersion rootProject.ext.minSdkVersion
+        targetSdkVersion rootProject.ext.targetSdkVersion
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        multiDexEnabled true
+
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    signingConfigs {
+        config {
+            storeFile file('reinforce.jks')
+            storePassword "123456789"
+            keyAlias "reinforcedemo"
+            keyPassword "123456789"
+        }
+    }
+
+    buildTypes {
+        release {
+            // 混淆
+            minifyEnabled true
+            // 对齐压缩
+            zipAlignEnabled false
+            // 移除无用的resource文件
+            shrinkResources true
+            // 不显示log
+            buildConfigField "boolean", "LOG_DEBUG", "false"
+
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
+
+            //指定 release包的输出文件名就是我们的渠道名字
+            applicationVariants.all { variant ->
+                variant.outputs.all { output ->
+                    def outputFile = output.outputFile
+                    if (outputFile != null && outputFile.name.endsWith('.apk')) {
+                        def fileName = "app-${defaultConfig.versionName}-release.apk"
+                        outputFileName = fileName
+                    }
+                }
+            }
+        }
+
+        debug {
+            minifyEnabled false   //开启混淆
+            zipAlignEnabled false  //压缩优化
+            shrinkResources false  //移出无用资源
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            //默认的混淆文件以及我们指定的混淆文件
+            signingConfig signingConfigs.config
+        }
+    }
+
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+    walle {
+        // 指定渠道包的输出路径
+        apkOutputFolder = new File("${project.buildDir}/outputs/channels")
+        // 定制渠道包的APK的文件名称
+        apkFileNameFormat = '${appName}-${channel}-${buildType}-v${versionName}-${versionCode}.apk'
+        // 渠道配置文件
+        channelFile = new File("${project.getProjectDir()}/channel")
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.0'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.1.1'
+
+    def dependenciesSupport = rootProject.ext.dependenciesSupport
+    implementation dependenciesSupport.appcompatx
+    implementation dependenciesSupport.design
+    implementation dependenciesSupport.appcompatV4
+    implementation dependenciesSupport.recyclerview
+    implementation dependenciesSupport.cardview
+    implementation dependenciesSupport.multidex
+    implementation dependenciesSupport.viewpager
+    implementation dependenciesSupport.fragment
+    implementation dependenciesSupport.constraintx
+
+    // Walle
+    implementation 'com.meituan.android.walle:library:1.1.6'
+}

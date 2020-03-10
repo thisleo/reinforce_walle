@@ -1,0 +1,54 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        google()
+        jcenter()
+
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:3.5.3'
+
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+        // 美团 Walle 打包
+        classpath 'com.meituan.android.walle:plugin:1.1.6'
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        jcenter()
+
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+
+
+project.ext {
+    applicationId = "com.chendy.reinforcedemo"
+    buildToolsVersion = "29.0.0"
+    compileSdkVersion = 29
+    minSdkVersion = 21
+    targetSdkVersion = 29
+    versionCode = 2
+    versionName = "2.0.0"
+
+    //Support相关库
+    dependenciesSupport = [
+            appcompatx  : "androidx.appcompat:appcompat:1.1.0",
+            appcompatV4 : "androidx.legacy:legacy-support-v4:1.0.0",
+            design      : "com.google.android.material:material:1.0.0",
+            recyclerview: "androidx.recyclerview:recyclerview:1.0.0",
+            cardview    : "androidx.cardview:cardview:1.0.0",
+            multidex    : "androidx.multidex:multidex:2.0.1",
+            fragment    : "androidx.fragment:fragment:1.1.0",
+            viewpager   : "androidx.viewpager:viewpager:1.0.0",
+            constraintx : "androidx.constraintlayout:constraintlayout:1.1.3"
+
+    ]
+}
