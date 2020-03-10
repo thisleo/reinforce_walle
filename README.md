@@ -1,11 +1,5 @@
 # 360加固 + 美团Walle多渠道自动化打包
 
-**在此感谢原创作者：天子卿**
-
-**附作者文章链接：https://juejin.im/post/5c825ac6f265da2db9129bd0**
-
-
-
 使用美团[walle](https://github.com/Meituan-Dianping/walle)进行多渠道打包可以节省大量的时间, 但是使用中发现一个问题:
 
 *之前是使用walle打多渠道包, 然后将apk上传360进行加固; 后来发现加固之后的APP没有了渠道信息, 并且发现360加固完成后的自动重签名只有V1签名*
@@ -17,6 +11,16 @@
 #### 我们希望实现gradle脚本实现自动化加固、签名和多渠道打包
 
 *目前可以使用[瓦力多渠道打包的Python脚本](https://github.com/yangchong211/YCWalleHelper)实现自动化打包, 但是使用的`python2.7`版本*
+
+
+
+另一种思路是使用gradle脚本实现:
+
+**在此感谢原创作者：天子卿**
+
+**附作者文章链接：https://juejin.im/post/5c825ac6f265da2db9129bd0**
+
+通过作者文章完成此demo, 如有侵权,请联系删除
 
 ![](https://raw.githubusercontent.com/Chendyiwhy/ImageUploader/master/20200310094634.png?token=AF4RSBBH4QYA7WLSV2T4TCS6M3Y3U)
 
