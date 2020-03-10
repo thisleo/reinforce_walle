@@ -1,5 +1,11 @@
 # 360加固 + 美团Walle多渠道自动化打包
 
+**在此感谢原创作者：天子卿**
+
+**附作者文章链接：https://juejin.im/post/5c825ac6f265da2db9129bd0**
+
+
+
 使用美团[walle](https://github.com/Meituan-Dianping/walle)进行多渠道打包可以节省大量的时间, 但是使用中发现一个问题:
 
 *之前是使用walle打多渠道包, 然后将apk上传360进行加固; 后来发现加固之后的APP没有了渠道信息, 并且发现360加固完成后的自动重签名只有V1签名*
@@ -372,7 +378,7 @@ ext {
 
 ![](https://raw.githubusercontent.com/Chendyiwhy/ImageUploader/master/20200310094819.png?token=AF4RSBGL2HVAHUCUAX5JQN26M3ZCG)
 
-**在此感谢原创作者：天子卿**
+**再次感谢原创作者：天子卿**
 
 **附作者文章链接：https://juejin.im/post/5c825ac6f265da2db9129bd0**
 
