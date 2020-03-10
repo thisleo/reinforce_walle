@@ -12,7 +12,7 @@
 
 *目前可以使用[瓦力多渠道打包的Python脚本](https://github.com/yangchong211/YCWalleHelper)实现自动化打包, 但是使用的`python2.7`版本*
 
-![](https://gitee.com/cdyiwhy/imgbed/raw/master/img/20200310093427.png)
+![](https://raw.githubusercontent.com/Chendyiwhy/ImageUploader/master/20200310094634.png?token=AF4RSBBH4QYA7WLSV2T4TCS6M3Y3U)
 
 ### 首先是集成Walle
 
@@ -158,7 +158,7 @@ String channel = WalleChannelReader.getChannel(this.getApplicationContext());
 
 为了代码解耦，我们不在app/build.gradle里面实现加固任务，而是重新建一个gradle文件來实现具体的加固和多渠道打包过程，在app/build.gradle只需要通过`apply from: '×××.gradle'`引用这个gradle文件即可，
 
-![](https://gitee.com/cdyiwhy/imgbed/raw/master/img/20200310092933.png)
+![](https://raw.githubusercontent.com/Chendyiwhy/ImageUploader/master/20200310094737.png?token=AF4RSBAL7QO66THEMVZN7KK6M3Y7S)
 
 
 
@@ -168,7 +168,7 @@ String channel = WalleChannelReader.getChannel(this.getApplicationContext());
 
 在[walle-cli-jar下载链接](https://github.com/Meituan-Dianping/walle/tree/master/walle-cli)下载jar包到自己项目中。
 
-![](https://gitee.com/cdyiwhy/imgbed/raw/master/img/20200310093055.png)
+![](https://raw.githubusercontent.com/Chendyiwhy/ImageUploader/master/20200310094759.png?token=AF4RSBDBT2PFQG2IBCQVUI26M3ZA6)
 
 确定加固任务的时机。加固任务时机应该在release包生成之后，那么加固任务应该依赖于assembleRelease这个任务，并且设置在这个任务之后执行。
 
@@ -370,7 +370,7 @@ ext {
 }
 ```
 
-![](https://gitee.com/cdyiwhy/imgbed/raw/master/img/20200310093134.png)
+![](https://raw.githubusercontent.com/Chendyiwhy/ImageUploader/master/20200310094819.png?token=AF4RSBGL2HVAHUCUAX5JQN26M3ZCG)
 
 **在此感谢原创作者：天子卿**
 
