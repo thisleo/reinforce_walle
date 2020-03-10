@@ -22,7 +22,7 @@
 
 通过作者文章完成此demo, 如有侵权,请联系删除
 
-![](https://raw.githubusercontent.com/Chendyiwhy/ImageUploader/master/20200310094634.png?token=AF4RSBBH4QYA7WLSV2T4TCS6M3Y3U)
+![](https://gitee.com/cdyiwhy/imgbed/raw/master/img/20200310093427.png)
 
 > > > ### 首先是集成Walle
 > > >
@@ -166,7 +166,7 @@
 
 为了代码解耦，我们不在app/build.gradle里面实现加固任务，而是重新建一个gradle文件來实现具体的加固和多渠道打包过程，在app/build.gradle只需要通过`apply from: '×××.gradle'`引用这个gradle文件即可，
 
-![](https://raw.githubusercontent.com/Chendyiwhy/ImageUploader/master/20200310094737.png?token=AF4RSBAL7QO66THEMVZN7KK6M3Y7S)
+![](https://gitee.com/cdyiwhy/imgbed/raw/master/img/20200310092933.png)
 
 
 
@@ -176,7 +176,7 @@
 
 在[walle-cli-jar下载链接](https://github.com/Meituan-Dianping/walle/tree/master/walle-cli)下载jar包到自己项目中。
 
-![](https://raw.githubusercontent.com/Chendyiwhy/ImageUploader/master/20200310094759.png?token=AF4RSBDBT2PFQG2IBCQVUI26M3ZA6)
+![](https://gitee.com/cdyiwhy/imgbed/raw/master/img/20200310093055.png)
 
 确定加固任务的时机。加固任务时机应该在release包生成之后，那么加固任务应该依赖于assembleRelease这个任务，并且设置在这个任务之后执行。
 
@@ -378,7 +378,7 @@ ext {
 }
 ```
 
-![](https://raw.githubusercontent.com/Chendyiwhy/ImageUploader/master/20200310094819.png?token=AF4RSBGL2HVAHUCUAX5JQN26M3ZCG)
+![](https://gitee.com/cdyiwhy/imgbed/raw/master/img/20200310093134.png)
 
 **再次感谢原创作者：天子卿**
 
